@@ -3,7 +3,7 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
-
+const axios = require('axios');
 
 public_users.post("/register", (req,res) => {
   const {username,password} = req.body;
@@ -19,9 +19,19 @@ public_users.post("/register", (req,res) => {
   }
 });
 
+public_users.get('/books', (req, res) => {
+  res.status(200).json(books);
+})
+
 // Get the book list available in the shop
-public_users.get('/',function (req, res) {
-  res.send(JSON.stringify(books, null, 4));
+public_users.get('/', async (req, res) => {
+  try {
+    const response = await axios.get('http://localhost:5000/books');
+    return res.status(200).json(response.data);
+  } catch (error) {
+    console.error("Error fetching books:", error.message);
+    return res.status(500).json({message: "Error fetching Books"});
+  }
 });
 
 // Get book details based on ISBN
@@ -30,6 +40,12 @@ public_users.get('/isbn/:isbn',function (req, res) {
   if(books[isbn]) {
     res.send(JSON.stringify(books[isbn], null, 4));
   }
+});
+
+// Get book details based on ISBN
+public_users.get('/isbn/:isbn', async(req, res) => {
+  let isbn = req.params.isbn;
+  
 });
   
 // Get book details based on author
@@ -42,8 +58,8 @@ public_users.get('/author/:author',function (req, res) {
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   let title = req.params.title.toLowerCase();
-  let match_titles = Object.values(title).filter(title => title.title.toLowerCase() === title);
-  res.send(JSON.stringify(match_titles, null, 4));
+  const match_titles = Object.values(books).filter(book => book.title.toLowerCase() === title);
+  res.json(match_titles);
 });
 
 //  Get book review
