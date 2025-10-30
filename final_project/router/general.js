@@ -61,11 +61,35 @@ public_users.get('/author/:author',function (req, res) {
   res.send(JSON.stringify(match_books, null, 4));
 });
 
+// Get book details based on author
+public_users.get('/async/author/:author', async(req, res) => {
+  const author = req.params.author.toLowerCase();
+  try {
+    const response = await axios(`http://localhost:5000/author/${author}`);
+    res.status(200).json(response.data);
+  } catch (error) {
+    console.error("Error fetching book by author: ", error.message);
+    res.status(500).json({message: "Book not found"})
+  }
+});
+
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   let title = req.params.title.toLowerCase();
   const match_titles = Object.values(books).filter(book => book.title.toLowerCase() === title);
   res.json(match_titles);
+});
+
+// Get all books based on title
+public_users.get('/async/title/:title', async(req, res) => {
+  const title = req.params.title.toLowerCase();
+  try {
+    const response = await axios(`http://localhost:5000/title/${title}`);
+    res.status(200).json(response.data);
+  } catch (error) {
+    console.error("Error fetching book by title: ", error.message);
+    res.status(500).json({message: "Book not found"});
+  }
 });
 
 //  Get book review
